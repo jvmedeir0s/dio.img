@@ -1,0 +1,79 @@
+from PIL import Image
+
+def converter_para_tons_de_cinza(caminho_imagem_entrada):
+    """
+    Converte uma imagem colorida para tons de cinza.
+
+    Args:
+        caminho_imagem_entrada (str): O caminho para a imagem colorida.
+
+    Returns:
+        Image: Um objeto de imagem em tons de cinza.
+    """
+    try:
+        img_colorida = Image.open(caminho_imagem_entrada)
+        largura, altura = img_colorida.size
+
+     
+        img_cinza = Image.new("L", (largura, altura))
+
+        for x in range(largura):
+            for y in range(altura):
+                r, g, b = img_colorida.getpixel((x, y))
+
+                valor_cinza = int(0.299 * r + 0.587 * g + 0.114 * b)
+
+                img_cinza.putpixel((x, y), valor_cinza)
+        
+        return img_cinza
+
+    except FileNotFoundError:
+        print(f"Erro: O arquivo '{caminho_imagem_entrada}' não foi encontrado.")
+        return None
+
+def binarizar_imagem(img_cinza, limiar=127):
+    """
+    Converte uma imagem em tons de cinza para preto e branco (binarizada).
+
+    Args:
+        img_cinza (Image): Um objeto de imagem em tons de cinza.
+        limiar (int): O valor de limiar para a binarização (0 a 255).
+
+    Returns:
+        Image: Um objeto de imagem binarizada.
+    """
+    largura, altura = img_cinza.size
+    
+    img_binarizada = Image.new("1", (largura, altura))
+
+    for x in range(largura):
+        for y in range(altura):
+            valor_pixel = img_cinza.getpixel((x, y))
+
+            if valor_pixel > limiar:
+                img_binarizada.putpixel((x, y), 255)
+            else:
+                img_binarizada.putpixel((x, y), 0) 
+    
+    return img_binarizada
+
+if __name__ == "__main__":
+    caminho_entrada = "imagem_colorida.jpg" # <-- Coloque o nome da sua imagem aqui
+    
+    caminho_saida_cinza = "resultado_cinza.jpg"
+    caminho_saida_binarizada = "resultado_binarizado.jpg"
+
+    print("Iniciando o processo de conversão...")
+
+
+    imagem_em_cinza = converter_para_tons_de_cinza(caminho_entrada)
+    
+    if imagem_em_cinza:
+        imagem_em_cinza.save(caminho_saida_cinza)
+        print(f"Imagem em tons de cinza salva como '{caminho_saida_cinza}'")
+
+        imagem_binarizada = binarizar_imagem(imagem_em_cinza, limiar=127)
+        imagem_binarizada.save(caminho_saida_binarizada)
+        print(f"Imagem binarizada salva como '{caminho_saida_binarizada}'")
+
+    print("Processo concluído.")
